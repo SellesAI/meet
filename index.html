@@ -271,8 +271,8 @@
             // Метод для початку запису
             async startRecording() {
                 // Перевірка наявності токена бота та ID чату зі змінних
-                if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === '1342195190:AAF6dfCUPZ-NeuQ3iFx6ERcK8QQNPgH5aYk' ||
-                    !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === '-1002576413834') {
+                if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN_HERE' ||
+                    !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === 'YOUR_TELEGRAM_CHAT_ID_HERE') {
                     this.logMessage('❌ Помилка: Будь ласка, пропишіть Bot Token та Chat ID у коді JavaScript.');
                     return;
                 }
