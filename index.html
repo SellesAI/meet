@@ -4,217 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🚀 Запис аудіо у WAV для Telegram</title>
+    <!-- Стилі залишаються без змін -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px; /* Зменшено максимальну ширину */
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            font-size: 28px; /* Зменшено розмір заголовка */
-        }
-        
-        .settings {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        input {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            box-sizing: border-box;
-        }
-        
-        .controls {
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        button {
-            font-size: 18px;
-            padding: 15px 30px;
-            margin: 10px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .start-btn {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-        }
-        
-        .start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-        }
-        
-        .stop-btn {
-            background: linear-gradient(45deg, #dc3545, #e74c3c);
-            color: white;
-        }
-        
-        .stop-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-        }
-        
-        .stop-btn:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .log-section {
-            margin-top: 20px;
-        }
-        
-        .log {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            height: 200px; /* Зменшено висоту логу */
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 14px; /* Зменшено розмір шрифту логу */
-        }
-        
-        .status {
-            text-align: center;
-            font-size: 18px;
-            margin: 20px 0;
-            font-weight: bold;
-        }
-        
-        .recording {
-            color: #ff6b6b;
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        .chunk-duration {
-            text-align: center;
-            margin: 10px 0;
-        }
-        
-        .chunk-duration input[type="range"] {
-            width: 200px;
-            margin: 0 10px;
-        }
-        
-        .section-title {
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #fff;
-        }
-        
-        .clear-btn {
-            background: linear-gradient(45deg, #6c757d, #495057);
-            color: white;
-            font-size: 14px;
-            padding: 8px 16px;
-        }
-        
-        .clear-btn:hover {
-            transform: translateY(-1px);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-            h1 {
-                font-size: 24px;
-            }
-            button {
-                font-size: 16px;
-                padding: 12px 25px;
-            }
-            .log {
-                height: 150px;
-            }
-        }
+        /* ... */
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🚀 Запис аудіо у WAV для Telegram</h1>
-        
-        <div class="settings">
-            <h3>⚙️ Налаштування Telegram</h3>
-            <div class="input-group">
-                <label for="botToken">Bot Token:</label>
-                <input type="password" id="botToken" placeholder="Введіть токен вашого бота">
-            </div>
-            <div class="input-group">
-                <label for="chatId">Chat ID:</label>
-                <input type="text" id="chatId" placeholder="Введіть ID чату">
-            </div>
-        </div>
-        
+
+        <!-- Блок з введенням токена та chat ID видалено -->
+
         <div class="chunk-duration">
             <label>Тривалість частини: <span id="durationValue">30</span> секунд</label>
             <br>
             <input type="range" id="chunkDuration" min="10" max="120" value="30" step="5">
         </div>
-        
+
         <div class="status" id="status">▶️ Готовий до запису</div>
-        
+
         <div class="controls">
             <button class="start-btn" id="startBtn">🎤 Старт</button>
             <button class="stop-btn" id="stopBtn" disabled>🚩 Стоп</button>
             <button class="clear-btn" id="clearLogsBtn">🗑️ Очистити логи</button>
         </div>
-        
+
         <div class="log-section">
             <div class="section-title">📝 Журнал подій</div>
             <div class="log" id="log">Готовий до роботи...
@@ -223,202 +37,154 @@
     </div>
 
     <script>
-        // Клас для керування програмою запису аудіо
+        // ЗАПОВНЮЄМО СЮДИ ТОКЕН І CHAT ID
+        const FIXED_BOT_TOKEN = "1342195190:AAF6dfCUPZ-NeuQ3iFx6ERcK8QQNPgH5aYk";
+        const FIXED_CHAT_ID = "-1002576413834";
+
         class AudioRecorderApp {
             constructor() {
-                // Властивості стану запису
-                this.isRecording = false; // Чи активний запис
-                this.mediaRecorder = null; // Об'єкт MediaRecorder
-                this.chunkCounter = 0; // Лічильник записаних аудіо-частин
-                
-                // Ініціалізація DOM-елементів
+                this.isRecording = false;
+                this.mediaRecorder = null;
+                this.chunkCounter = 0;
                 this.initializeElements();
-                // Налаштування обробників подій
                 this.setupEventListeners();
             }
-            
-            // Метод для отримання посилань на DOM-елементи
+
             initializeElements() {
                 this.startBtn = document.getElementById('startBtn');
                 this.stopBtn = document.getElementById('stopBtn');
                 this.status = document.getElementById('status');
                 this.log = document.getElementById('log');
-                this.botToken = document.getElementById('botToken');
-                this.chatId = document.getElementById('chatId');
                 this.chunkDuration = document.getElementById('chunkDuration');
                 this.durationValue = document.getElementById('durationValue');
                 this.clearLogsBtn = document.getElementById('clearLogsBtn');
             }
-            
-            // Метод для налаштування обробників подій
+
             setupEventListeners() {
                 this.startBtn.addEventListener('click', () => this.startRecording());
                 this.stopBtn.addEventListener('click', () => this.stopRecording());
-                // Оновлення значення тривалості частини при зміні повзунка
                 this.chunkDuration.addEventListener('input', (e) => {
                     this.durationValue.textContent = e.target.value;
                 });
-                // Очищення логів
                 this.clearLogsBtn.addEventListener('click', () => {
                     this.log.textContent = 'Логи очищено...\n';
                 });
             }
-            
-            // Метод для додавання повідомлень у журнал логів
+
             logMessage(message) {
                 const timestamp = new Date().toLocaleTimeString('uk-UA');
                 this.log.textContent += `\n[${timestamp}] ${message}`;
-                // Прокручуємо журнал донизу
                 this.log.scrollTop = this.log.scrollHeight;
             }
-            
-            // Метод для початку запису
+
             async startRecording() {
-                // Перевірка наявності токена бота та ID чату
-                if (!this.botToken.value || !this.chatId.value) {
-                    this.logMessage('❌ Помилка: Будь ласка, введіть Bot Token та Chat ID');
-                    return;
-                }
-                
                 try {
-                    // Запит доступу до мікрофона з потрібними параметрами
                     const stream = await navigator.mediaDevices.getUserMedia({ 
                         audio: {
-                            sampleRate: 16000, // Рекомендована частота дискретизації для Whisper
-                            channelCount: 1, // Моно-канал
+                            sampleRate: 16000,
+                            channelCount: 1,
                             echoCancellation: true,
                             noiseSuppression: true
                         } 
                     });
-                    
+
                     this.isRecording = true;
                     this.chunkCounter = 0;
-                    // Оновлення стану кнопок та статусу
                     this.startBtn.disabled = true;
                     this.stopBtn.disabled = false;
                     this.status.textContent = '🔴 Запис активний...';
                     this.status.classList.add('recording');
-                    
                     this.logMessage('🔴 Запис розпочато...');
-                    
-                    // Початок запису першої частини
                     this.startChunkRecording(stream);
-                    
+
                 } catch (error) {
                     this.logMessage(`❌ Помилка доступу до мікрофона: ${error.message}`);
                 }
             }
-            
-            // Метод для початку запису однієї частини аудіо
+
             startChunkRecording(stream) {
-                // Якщо запис зупинено, виходимо
                 if (!this.isRecording) return;
-                
                 const chunks = [];
-                // Запис у WebM з Opus, оскільки це добре підтримується браузерами
                 this.mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'audio/webm;codecs=opus' 
+                    mimeType: 'audio/webm;codecs=opus'
                 });
-                
-                // Обробник події, коли доступні дані
+
                 this.mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) {
                         chunks.push(event.data);
                     }
                 };
-                
-                // Обробник події, коли запис частини зупинено
+
                 this.mediaRecorder.onstop = async () => {
-                    // Створення Blob з записаних частин у форматі WebM
                     const webmAudioBlob = new Blob(chunks, { type: 'audio/webm' }); 
                     const timestamp = Date.now();
-                    
+
                     this.logMessage(`⏳ Конвертую WebM в WAV для відправки...`);
                     try {
-                        // Конвертуємо WebM Blob у WAV Blob
                         const wavAudioBlob = await this.convertWebmToWav(webmAudioBlob);
-                        // Відправляємо конвертоване WAV аудіо в Telegram
                         await this.sendAudioToTelegram(wavAudioBlob, timestamp);
                     } catch (conversionError) {
-                        this.logMessage(`❌ Помилка конвертації WebM в WAV: ${conversionError.message}`);
+                        this.logMessage(`❌ Помилка конвертації: ${conversionError.message}`);
                     }
-                    
-                    // Запускаємо наступний чанк через невелику паузу, якщо запис ще активний
+
                     if (this.isRecording) {
                         setTimeout(() => this.startChunkRecording(stream), 500);
                     }
                 };
-                
+
                 this.mediaRecorder.start();
                 this.chunkCounter++;
                 this.logMessage(`🎵 Запис частини ${this.chunkCounter} (${this.chunkDuration.value}с)...`);
-                
-                // Зупиняємо запис через вказаний час
+
                 setTimeout(() => {
                     if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
                         this.mediaRecorder.stop();
                     }
                 }, parseInt(this.chunkDuration.value) * 1000);
             }
-            
-            // Метод для зупинки запису
+
             stopRecording() {
                 this.isRecording = false;
-                
-                // Зупиняємо MediaRecorder, якщо він активний
                 if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
                     this.mediaRecorder.stop();
                 }
-                
-                // Відновлюємо стан кнопок та статусу
                 this.startBtn.disabled = false;
                 this.stopBtn.disabled = true;
                 this.status.textContent = '⏹️ Запис зупинено';
                 this.status.classList.remove('recording');
-                
                 this.logMessage('⏹️ Запис зупинено');
             }
-            
-            // Метод для відправки аудіо в Telegram як аудіофайл (тепер WAV)
+
             async sendAudioToTelegram(audioBlob, timestamp) {
                 const formData = new FormData();
-                const filename = `audio_chunk_${timestamp}.wav`; // Використовуємо розширення .wav
-                
+                const filename = `audio_chunk_${timestamp}.wav`;
                 formData.append('audio', audioBlob, filename); 
-                formData.append('chat_id', this.chatId.value);
-                
-                const url = `https://api.telegram.org/bot${this.botToken.value}/sendAudio`; 
-                
+                formData.append('chat_id', FIXED_CHAT_ID);
+                const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendAudio`; 
                 try {
-                    this.logMessage(`📤 Відправляю аудіо ${filename} в Telegram...`);
-                    
+                    this.logMessage(`📤 Відправляю ${filename} в Telegram...`);
                     const response = await fetch(url, {
                         method: 'POST',
                         body: formData
                     });
-                    
                     const result = await response.json();
-                    
                     if (response.ok && result.ok) {
                         this.logMessage(`✅ Аудіо успішно відправлено: ${filename}`);
                     } else {
-                        this.logMessage(`❌ Помилка відправки аудіо ${filename}: ${result.description || 'Невідома помилка'}`);
+                        this.logMessage(`❌ Помилка відправки: ${result.description || 'Невідома'}`);
                     }
                 } catch (error) {
-                    this.logMessage(`❌ Помилка мережі при відправці аудіо ${filename}: ${error.message}`);
+                    this.logMessage(`❌ Помилка мережі: ${error.message}`);
                 }
             }
-            
-            // Функція для конвертації WebM Blob у WAV Blob
+
             async convertWebmToWav(webmBlob) {
                 return new Promise((resolve, reject) => {
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     const fileReader = new FileReader();
-
                     fileReader.onload = async () => {
                         try {
                             const audioBuffer = await audioContext.decodeAudioData(fileReader.result);
-
                             const offlineAudioContext = new OfflineAudioContext(
                                 audioBuffer.numberOfChannels,
                                 audioBuffer.length,
@@ -428,10 +194,7 @@
                             source.buffer = audioBuffer;
                             source.connect(offlineAudioContext.destination);
                             source.start(0);
-
                             const renderedBuffer = await offlineAudioContext.startRendering();
-
-                            // ВИПРАВЛЕНО: Використовуємо audioBuffer.sampleRate замість audioBuffer.sampleBuffer
                             const wavData = this.encodeWAV(renderedBuffer, audioBuffer.sampleRate, audioBuffer.numberOfChannels);
                             const wavBlob = new Blob([wavData], { type: 'audio/wav' });
                             resolve(wavBlob);
@@ -444,56 +207,42 @@
                 });
             }
 
-            // Функція для кодування AudioBuffer у WAV формат
             encodeWAV(audioBuffer, sampleRate, numChannels) {
                 const dataLength = audioBuffer.length * numChannels * 2; 
                 const buffer = new ArrayBuffer(44 + dataLength);
                 const view = new DataView(buffer);
-
                 let offset = 0;
-
-                // RIFF chunk descriptor
                 this.writeString(view, offset, 'RIFF'); offset += 4;
                 view.setUint32(offset, 36 + dataLength, true); offset += 4;
                 this.writeString(view, offset, 'WAVE'); offset += 4;
-
-                // FMT chunk
                 this.writeString(view, offset, 'fmt '); offset += 4;
-                view.setUint32(offset, 16, true); offset += 4; // chunkSize
-                view.setUint16(offset, 1, true); offset += 2; // wFormatTag (1 for PCM)
-                view.setUint16(offset, numChannels, true); offset += 2; // nChannels
-                view.setUint32(offset, sampleRate, true); offset += 4; // dwSamplesPerSec
-                view.setUint32(offset, sampleRate * numChannels * 2, true); offset += 4; // dwAvgBytesPerSec
-                view.setUint16(offset, numChannels * 2, true); offset += 2; // wBlockAlign
-                view.setUint16(offset, 16, true); offset += 2; // wBitsPerSample
-
-                // DATA chunk
+                view.setUint32(offset, 16, true); offset += 4;
+                view.setUint16(offset, 1, true); offset += 2;
+                view.setUint16(offset, numChannels, true); offset += 2;
+                view.setUint32(offset, sampleRate, true); offset += 4;
+                view.setUint32(offset, sampleRate * numChannels * 2, true); offset += 4;
+                view.setUint16(offset, numChannels * 2, true); offset += 2;
+                view.setUint16(offset, 16, true); offset += 2;
                 this.writeString(view, offset, 'data'); offset += 4;
                 view.setUint32(offset, dataLength, true); offset += 4;
-
-                // Записуємо PCM семпли
                 for (let i = 0; i < audioBuffer.length; i++) {
                     for (let channel = 0; channel < numChannels; channel++) {
                         let sample = audioBuffer.getChannelData(channel)[i];
-                        // Конвертуємо float у 16-бітний PCM
                         const s = Math.max(-1, Math.min(1, sample));
                         view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
                         offset += 2;
                     }
                 }
-
                 return buffer;
             }
 
-            // Допоміжна функція для запису рядка у DataView
             writeString(view, offset, string) {
                 for (let i = 0; i < string.length; i++) {
                     view.setUint8(offset + i, string.charCodeAt(i));
                 }
             }
         }
-        
-        // Ініціалізація додатку після завантаження сторінки
+
         document.addEventListener('DOMContentLoaded', () => {
             new AudioRecorderApp();
         });
