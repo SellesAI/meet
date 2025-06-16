@@ -38,8 +38,8 @@
 
     <script>
         // ЗАПОВНЮЄМО СЮДИ ТОКЕН І CHAT ID
-        const FIXED_BOT_TOKEN = "1342195190:AAF6dfCUPZ-NeuQ3iFx6ERcK8QQNPgH5aYk";
-        const FIXED_CHAT_ID = "-1002323091680";
+        const FIXED_BOT_TOKEN = "7559425067:AAEoI0api5HvyDGOulacrGcqNHAT0fqwHcE";
+        //const FIXED_CHAT_ID = "-1002323091680";
 
         class AudioRecorderApp {
             constructor() {
@@ -159,7 +159,7 @@
                 const formData = new FormData();
                 const filename = `audio_chunk_${timestamp}.wav`;
                 formData.append('audio', audioBlob, filename); 
-                formData.append('chat_id', FIXED_CHAT_ID);
+               // formData.append('chat_id', FIXED_CHAT_ID);
                 const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendAudio`; 
                 try {
                     this.logMessage(`📤 Відправляю ${filename} в Telegram...`);
