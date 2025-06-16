@@ -4,21 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🚀 Запис аудіо у WAV для Telegram</title>
-    <!-- Стилі залишаються без змін -->
     <style>
-        /* ... */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-sizing: border-box;
+        }
+        .chunk-duration, .controls, .log-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .status {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .recording {
+            color: #ff6b6b;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        button {
+            font-size: 18px;
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .start-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+        .stop-btn {
+            background: linear-gradient(45deg, #dc3545, #e74c3c);
+            color: white;
+        }
+        .clear-btn {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🚀 Запис аудіо у WAV для Telegram</h1>
 
-        <!-- Блок з введенням токена та chat ID видалено -->
+        <div class="input-group">
+            <label for="meetingName">Назва зустрічі:</label>
+            <input type="text" id="meetingName" placeholder="Введіть назву зустрічі">
+        </div>
 
         <div class="chunk-duration">
-            <label>Тривалість частини: <span id="durationValue">30</span> секунд</label>
-            <br>
-            <input type="range" id="chunkDuration" min="10" max="120" value="30" step="5">
+            <label>Тривалість частини: <span id="durationValue">30</span> секунд</label><br>
+            <input type="range" id="chunkDuration" min="10" max="300" value="30" step="5">
         </div>
 
         <div class="status" id="status">▶️ Готовий до запису</div>
@@ -31,13 +126,11 @@
 
         <div class="log-section">
             <div class="section-title">📝 Журнал подій</div>
-            <div class="log" id="log">Готовий до роботи...
-            </div>
+            <div class="log" id="log">Готовий до роботи...</div>
         </div>
     </div>
 
     <script>
-        // ЗАПОВНЮЄМО СЮДИ ТОКЕН І CHAT ID
         const FIXED_BOT_TOKEN = "7559425067:AAEoI0api5HvyDGOulacrGcqNHAT0fqwHcE";
         const FIXED_CHAT_ID = "-1002576413834";
 
@@ -49,7 +142,6 @@
                 this.initializeElements();
                 this.setupEventListeners();
             }
-
             initializeElements() {
                 this.startBtn = document.getElementById('startBtn');
                 this.stopBtn = document.getElementById('stopBtn');
@@ -58,8 +150,8 @@
                 this.chunkDuration = document.getElementById('chunkDuration');
                 this.durationValue = document.getElementById('durationValue');
                 this.clearLogsBtn = document.getElementById('clearLogsBtn');
+                this.meetingNameInput = document.getElementById('meetingName');
             }
-
             setupEventListeners() {
                 this.startBtn.addEventListener('click', () => this.startRecording());
                 this.stopBtn.addEventListener('click', () => this.stopRecording());
@@ -70,13 +162,11 @@
                     this.log.textContent = 'Логи очищено...\n';
                 });
             }
-
             logMessage(message) {
                 const timestamp = new Date().toLocaleTimeString('uk-UA');
                 this.log.textContent += `\n[${timestamp}] ${message}`;
                 this.log.scrollTop = this.log.scrollHeight;
             }
-
             async startRecording() {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -87,7 +177,6 @@
                             noiseSuppression: true
                         } 
                     });
-
                     this.isRecording = true;
                     this.chunkCounter = 0;
                     this.startBtn.disabled = true;
@@ -96,29 +185,24 @@
                     this.status.classList.add('recording');
                     this.logMessage('🔴 Запис розпочато...');
                     this.startChunkRecording(stream);
-
                 } catch (error) {
                     this.logMessage(`❌ Помилка доступу до мікрофона: ${error.message}`);
                 }
             }
-
             startChunkRecording(stream) {
                 if (!this.isRecording) return;
                 const chunks = [];
                 this.mediaRecorder = new MediaRecorder(stream, {
                     mimeType: 'audio/webm;codecs=opus'
                 });
-
                 this.mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) {
                         chunks.push(event.data);
                     }
                 };
-
                 this.mediaRecorder.onstop = async () => {
                     const webmAudioBlob = new Blob(chunks, { type: 'audio/webm' }); 
                     const timestamp = Date.now();
-
                     this.logMessage(`⏳ Конвертую WebM в WAV для відправки...`);
                     try {
                         const wavAudioBlob = await this.convertWebmToWav(webmAudioBlob);
@@ -126,23 +210,19 @@
                     } catch (conversionError) {
                         this.logMessage(`❌ Помилка конвертації: ${conversionError.message}`);
                     }
-
                     if (this.isRecording) {
                         setTimeout(() => this.startChunkRecording(stream), 500);
                     }
                 };
-
                 this.mediaRecorder.start();
                 this.chunkCounter++;
                 this.logMessage(`🎵 Запис частини ${this.chunkCounter} (${this.chunkDuration.value}с)...`);
-
                 setTimeout(() => {
                     if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
                         this.mediaRecorder.stop();
                     }
                 }, parseInt(this.chunkDuration.value) * 1000);
             }
-
             stopRecording() {
                 this.isRecording = false;
                 if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
@@ -154,10 +234,10 @@
                 this.status.classList.remove('recording');
                 this.logMessage('⏹️ Запис зупинено');
             }
-
             async sendAudioToTelegram(audioBlob, timestamp) {
                 const formData = new FormData();
-                const filename = `audio_chunk_${timestamp}.wav`;
+                const meetingName = this.meetingNameInput.value.trim() || "Без_назви";
+                const filename = `${meetingName.replace(/[^a-zA-Z0-9_\-]/g, '_')}_${timestamp}.wav`;
                 formData.append('audio', audioBlob, filename); 
                 formData.append('chat_id', FIXED_CHAT_ID);
                 const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendAudio`; 
@@ -177,7 +257,6 @@
                     this.logMessage(`❌ Помилка мережі: ${error.message}`);
                 }
             }
-
             async convertWebmToWav(webmBlob) {
                 return new Promise((resolve, reject) => {
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -206,7 +285,6 @@
                     fileReader.readAsArrayBuffer(webmBlob);
                 });
             }
-
             encodeWAV(audioBuffer, sampleRate, numChannels) {
                 const dataLength = audioBuffer.length * numChannels * 2; 
                 const buffer = new ArrayBuffer(44 + dataLength);
@@ -235,14 +313,12 @@
                 }
                 return buffer;
             }
-
             writeString(view, offset, string) {
                 for (let i = 0; i < string.length; i++) {
                     view.setUint8(offset + i, string.charCodeAt(i));
                 }
             }
         }
-
         document.addEventListener('DOMContentLoaded', () => {
             new AudioRecorderApp();
         });
