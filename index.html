@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px; /* Зменшено максимальну ширину */
+            max-width: 600px; /* Зменшено максимальну ширину */
             margin: 0 auto;
             padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -36,31 +36,39 @@
             font-size: 28px; /* Зменшено розмір заголовка */
         }
         
-        .settings {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .chunk-duration {
+            text-align: center;
+            margin: 20px 0; /* Збільшено відступи */
+            background: rgba(255, 255, 255, 0.1); /* Додано фон */
+            border-radius: 10px; /* Закруглені кути */
+            padding: 15px; /* Внутрішній відступ */
         }
         
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        input {
+        .chunk-duration input[type="range"] {
             width: 100%;
-            padding: 10px;
-            border: none;
+            margin: 10px 0;
+            -webkit-appearance: none;
+            height: 8px;
             border-radius: 5px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            box-sizing: border-box;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+
+        .chunk-duration input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        .chunk-duration input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #764ba2;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
         
         .controls {
@@ -103,10 +111,12 @@
             background: #6c757d;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none; /* Видалити тінь, коли вимкнено */
         }
         
         .log-section {
             margin-top: 20px;
+            width: 100%;
         }
         
         .log {
@@ -137,16 +147,6 @@
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
-        }
-        
-        .chunk-duration {
-            text-align: center;
-            margin: 10px 0;
-        }
-        
-        .chunk-duration input[type="range"] {
-            width: 200px;
-            margin: 0 10px;
         }
         
         .section-title {
@@ -189,18 +189,7 @@
     <div class="container">
         <h1>🚀 Запис аудіо у WAV для Telegram</h1>
         
-        <div class="settings">
-            <h3>⚙️ Налаштування Telegram</h3>
-            <div class="input-group">
-                <label for="botToken">Bot Token:</label>
-                <input type="password" id="botToken" placeholder="Ваш_Токен_Телеграм">
-            </div>
-            <div class="input-group">
-                <label for="chatId">Chat ID:</label>
-                <input type="text" id="chatId" placeholder=" Chat_ID ">
-            </div>
-        </div>
-        
+        <!-- Розділ налаштувань Telegram прихований, оскільки токен та ID прописані у коді -->
         <div class="chunk-duration">
             <label>Тривалість частини: <span id="durationValue">30</span> секунд</label>
             <br>
@@ -223,6 +212,14 @@
     </div>
 
     <script>
+        // === КОНФІГУРАЦІЯ ===
+        // !!! УВАГА: Зберігання токена та ID безпосередньо в коді НЕБЕЗПЕЧНО для публічних проектів.
+        // Будь-хто, хто перегляне вихідний код, зможе отримати доступ до цих даних.
+        // Використовуйте цей підхід лише для особистого використання або в контрольованому середовищі.
+        const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN_HERE'; // <--- Вставте сюди ваш Bot Token
+        const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID_HERE';     // <--- Вставте сюди ваш Chat ID
+        // ====================
+
         // Клас для керування програмою запису аудіо
         class AudioRecorderApp {
             constructor() {
@@ -243,11 +240,10 @@
                 this.stopBtn = document.getElementById('stopBtn');
                 this.status = document.getElementById('status');
                 this.log = document.getElementById('log');
-                this.botToken = document.getElementById('botToken');
-                this.chatId = document.getElementById('chatId');
                 this.chunkDuration = document.getElementById('chunkDuration');
                 this.durationValue = document.getElementById('durationValue');
                 this.clearLogsBtn = document.getElementById('clearLogsBtn');
+                // Bot Token та Chat ID тепер не є DOM-елементами в цій версії
             }
             
             // Метод для налаштування обробників подій
@@ -274,9 +270,10 @@
             
             // Метод для початку запису
             async startRecording() {
-                // Перевірка наявності токена бота та ID чату
-                if (!this.botToken.value || !this.chatId.value) {
-                    this.logMessage('❌ Помилка: Будь ласка, введіть Bot Token та Chat ID');
+                // Перевірка наявності токена бота та ID чату зі змінних
+                if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === '1342195190:AAF6dfCUPZ-NeuQ3iFx6ERcK8QQNPgH5aYk' ||
+                    !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === '-1002576413834') {
+                    this.logMessage('❌ Помилка: Будь ласка, пропишіть Bot Token та Chat ID у коді JavaScript.');
                     return;
                 }
                 
@@ -385,9 +382,9 @@
                 const filename = `audio_chunk_${timestamp}.wav`; // Використовуємо розширення .wav
                 
                 formData.append('audio', audioBlob, filename); 
-                formData.append('chat_id', this.chatId.value);
+                formData.append('chat_id', TELEGRAM_CHAT_ID); // Використовуємо змінну
                 
-                const url = `https://api.telegram.org/bot${this.botToken.value}/sendAudio`; 
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendAudio`; // Використовуємо змінну
                 
                 try {
                     this.logMessage(`📤 Відправляю аудіо ${filename} в Telegram...`);
@@ -431,7 +428,6 @@
 
                             const renderedBuffer = await offlineAudioContext.startRendering();
 
-                            // ВИПРАВЛЕНО: Використовуємо audioBuffer.sampleRate замість audioBuffer.sampleBuffer
                             const wavData = this.encodeWAV(renderedBuffer, audioBuffer.sampleRate, audioBuffer.numberOfChannels);
                             const wavBlob = new Blob([wavData], { type: 'audio/wav' });
                             resolve(wavBlob);
