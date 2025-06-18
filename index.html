@@ -95,6 +95,9 @@
         .stop-btn {
             background: linear-gradient(45deg, #dc3545, #e74c3c);
             color: white;
+	.pause-btn {
+            background: linear-gradient(45deg, #FFEB3B, #FFC107);
+            color: white;
         }
         .clear-btn {
             background: linear-gradient(45deg, #6c757d, #495057);
@@ -113,13 +116,14 @@
 
         <div class="chunk-duration">
             <label>Тривалість частини: <span id="durationValue">30</span> секунд</label><br>
-            <input type="range" id="chunkDuration" min="10" max="300" value="30" step="5">
+            <input type="range" id="chunkDuration" min="10" max="900" value="600" step="5">
         </div>
 
         <div class="status" id="status">▶️ Готовий до запису</div>
 
         <div class="controls">
             <button class="start-btn" id="startBtn">🎤 Старт</button>
+            <button class="pause-btn" id="pauseBtn">⏸ Пауза</button>
             <button class="stop-btn" id="stopBtn" disabled>🚩 Стоп</button>
             <button class="clear-btn" id="clearLogsBtn">🗑️ Очистити логи</button>
         </div>
@@ -139,12 +143,14 @@
                 this.isRecording = false;
                 this.mediaRecorder = null;
                 this.chunkCounter = 0;
+                this.endSession = false;
                 this.initializeElements();
                 this.setupEventListeners();
             }
             initializeElements() {
                 this.startBtn = document.getElementById('startBtn');
                 this.stopBtn = document.getElementById('stopBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
                 this.status = document.getElementById('status');
                 this.log = document.getElementById('log');
                 this.chunkDuration = document.getElementById('chunkDuration');
@@ -155,6 +161,7 @@
             setupEventListeners() {
                 this.startBtn.addEventListener('click', () => this.startRecording());
                 this.stopBtn.addEventListener('click', () => this.stopRecording());
+                this.pauseBtn.addEventListener('click', () => this.pauseRecording());
                 this.chunkDuration.addEventListener('input', (e) => {
                     this.durationValue.textContent = e.target.value;
                 });
@@ -169,15 +176,16 @@
             }
             async startRecording() {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                    const stream = await navigator.mediaDevices.getUserMedia({
                         audio: {
                             sampleRate: 16000,
                             channelCount: 1,
                             echoCancellation: true,
                             noiseSuppression: true
-                        } 
+                        }
                     });
                     this.isRecording = true;
+                    this.endSession = false;
                     this.chunkCounter = 0;
                     this.startBtn.disabled = true;
                     this.stopBtn.disabled = false;
@@ -188,6 +196,30 @@
                 } catch (error) {
                     this.logMessage(`❌ Помилка доступу до мікрофона: ${error.message}`);
                 }
+            }
+            pauseRecording() {
+                this.isRecording = false;
+                this.logMessage('⏸ Пауза натиснута');
+                if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                    this.mediaRecorder.stop();
+                }
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = false;
+                this.status.textContent = '⏸ Запис призупинено';
+                this.status.classList.remove('recording');
+            }
+            stopRecording() {
+                this.isRecording = false;
+                this.endSession = true;
+                if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                    this.mediaRecorder.stop();
+                }
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.pauseBtn.disabled = true;
+                this.status.textContent = '⏹️ Запис зупинено';
+                this.status.classList.remove('recording');
+                this.logMessage('⏹️ Запис зупинено з позначкою END');
             }
             startChunkRecording(stream) {
                 if (!this.isRecording) return;
@@ -201,7 +233,7 @@
                     }
                 };
                 this.mediaRecorder.onstop = async () => {
-                    const webmAudioBlob = new Blob(chunks, { type: 'audio/webm' }); 
+                    const webmAudioBlob = new Blob(chunks, { type: 'audio/webm' });
                     const timestamp = Date.now();
                     this.logMessage(`⏳ Конвертую WebM в WAV для відправки...`);
                     try {
@@ -223,24 +255,13 @@
                     }
                 }, parseInt(this.chunkDuration.value) * 1000);
             }
-            stopRecording() {
-                this.isRecording = false;
-                if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-                    this.mediaRecorder.stop();
-                }
-                this.startBtn.disabled = false;
-                this.stopBtn.disabled = true;
-                this.status.textContent = '⏹️ Запис зупинено';
-                this.status.classList.remove('recording');
-                this.logMessage('⏹️ Запис зупинено');
-            }
             async sendAudioToTelegram(audioBlob, timestamp) {
                 const formData = new FormData();
-                const meetingName = this.meetingNameInput.value.trim() || "Без_назви";
-                const filename = `${meetingName.replace(/[^a-zA-Z0-9_\-]/g, '_')}_${timestamp}.wav`;
-                formData.append('audio', audioBlob, filename); 
+                const baseName = this.meetingNameInput.value.trim() || 'audio';
+                const filename = `${baseName.replace(/[^a-zA-Z0-9_\-]/g, '_')}_${timestamp}${this.endSession ? '_END' : ''}.wav`;
+                formData.append('audio', audioBlob, filename);
                 formData.append('chat_id', FIXED_CHAT_ID);
-                const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendAudio`; 
+                const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendAudio`;
                 try {
                     this.logMessage(`📤 Відправляю ${filename} в Telegram...`);
                     const response = await fetch(url, {
@@ -286,7 +307,7 @@
                 });
             }
             encodeWAV(audioBuffer, sampleRate, numChannels) {
-                const dataLength = audioBuffer.length * numChannels * 2; 
+                const dataLength = audioBuffer.length * numChannels * 2;
                 const buffer = new ArrayBuffer(44 + dataLength);
                 const view = new DataView(buffer);
                 let offset = 0;
