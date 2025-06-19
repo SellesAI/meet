@@ -258,7 +258,7 @@
             async sendAudioToTelegram(audioBlob, timestamp) {
                 const formData = new FormData();
                 const baseName = this.meetingNameInput.value.trim() || 'audio';
-                const filename = `${baseName.replace(/[^a-zA-Z0-9_\-]/g, '_')}_${timestamp}${this.endSession ? '_END' : ''}.wav`;
+                const filename = `${baseName.replace(/[^a-zA-Z0-9_\-\u0400-\u04FF]/g, '#')}_${timestamp}${this.endSession ? '_END' : ''}.wav`;
                 formData.append('audio', audioBlob, filename);
                 formData.append('chat_id', FIXED_CHAT_ID);
                 const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendAudio`;
