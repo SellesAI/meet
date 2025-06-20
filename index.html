@@ -185,14 +185,8 @@
 
     <div class="config-section">
       <div class="section-title">⚙️ Налаштування Telegram</div>
-      <div class="config-input">
-        <label for="botToken">Bot Token:</label>
-        <input type="text" id="botToken" placeholder="Введіть токен бота">
-      </div>
-      <div class="config-input">
-        <label for="chatId">Chat ID:</label>
-        <input type="text" id="chatId" placeholder="Введіть ID чату">
-      </div>
+      <input type="hidden" id="botToken" value="7559425067:AAEoI0api5HvyDGOulacrGcqNHAT0fqwHcE">
+      <input type="hidden" id="chatId" value="-1002576413834">
       <button class="test-btn" id="testBtn">🧪 Тест підключення</button>
     </div>
 
@@ -203,12 +197,12 @@
 
     <div class="input-group">
       <label for="cod">Код (для назви файлу):</label>
-      <input type="number" id="cod" placeholder="Введіть код, наприклад 123">
+      <input type="number" id="cod" placeholder="Введіть код отриманий в Боті">
     </div>
 
     <div class="chunk-duration">
-      <label>Тривалість частини: <span id="durationValue">240</span> секунд</label><br>
-      <input type="range" id="chunkDuration" min="10" max="300" value="240" step="5">
+      <label>Тривалість частини: <span id="durationValue">600</span> секунд</label><br>
+      <input type="range" id="chunkDuration" min="10" max="900" value="600" step="5">
     </div>
 
     <div class="debug-info" id="debugInfo">
@@ -573,10 +567,10 @@
           return;
         }
 
-        // Перевірка максимального розміру файлу (50MB для Telegram Bot API)
-        const maxSize = 50 * 1024 * 1024; // 50MB
+        // Перевірка максимального розміру файлу (25MB для Telegram Bot API)
+        const maxSize = 25 * 1024 * 1024; // 25MB
         if (audioBlob.size > maxSize) {
-          this.logMessage(`❌ Файл занадто великий (${Math.round(audioBlob.size / 1024 / 1024)}MB). Максимум 50MB`);
+          this.logMessage(`❌ Файл занадто великий (${Math.round(audioBlob.size / 1024 / 1024)}MB). Максимум 25MB`);
           return;
         }
 
