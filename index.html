@@ -638,10 +638,10 @@
     const initDataUnsafe = tg.initDataUnsafe;
 
     if (initDataUnsafe && initDataUnsafe.user && initDataUnsafe.user.id) {
-      const chatId = initDataUnsafe.user.id;
+      const codId = initDataUnsafe.user.id;
       const chatIdField = document.getElementById("cod");
       if (chatIdField) {
-        chatIdField.value = chatId;
+        chatIdField.value = codId;
       }
     } else {
       console.log("Не вдалося отримати chat_id з Telegram WebApp.");
