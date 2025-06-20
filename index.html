@@ -43,6 +43,7 @@
       border-radius: 10px;
       font-size: 16px;
       transition: border-color 0.3s;
+      box-sizing: border-box;
     }
     input[type="text"]:focus, input[type="number"]:focus {
       outline: none;
@@ -161,11 +162,39 @@
       margin: 20px 0;
       font-size: 14px;
     }
+    .config-section {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .config-input {
+      margin-bottom: 10px;
+    }
+    .test-btn {
+      background: #17a2b8;
+      color: white;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🚀 AI Meeting Recorder</h1>
+
+    <div class="config-section">
+      <div class="section-title">⚙️ Налаштування Telegram</div>
+      <div class="config-input">
+        <label for="botToken">Bot Token:</label>
+        <input type="text" id="botToken" placeholder="Введіть токен бота">
+      </div>
+      <div class="config-input">
+        <label for="chatId">Chat ID:</label>
+        <input type="text" id="chatId" placeholder="Введіть ID чату">
+      </div>
+      <button class="test-btn" id="testBtn">🧪 Тест підключення</button>
+    </div>
 
     <div class="input-group">
       <label for="meetingName">Назва зустрічі:</label>
@@ -203,9 +232,6 @@
   </div>
 
   <script>
-    const FIXED_BOT_TOKEN = "7559425067:AAEoI0api5HvyDGOulacrGcqNHAT0fqwHcE";
-    const FIXED_CHAT_ID = "-1002576413834";
-
     class AudioRecorderApp {
       constructor() {
         this.isRecording = false;
@@ -231,6 +257,9 @@
         this.meetingNameInput = document.getElementById('meetingName');
         this.codInput = document.getElementById('cod');
         this.supportInfo = document.getElementById('supportInfo');
+        this.botTokenInput = document.getElementById('botToken');
+        this.chatIdInput = document.getElementById('chatId');
+        this.testBtn = document.getElementById('testBtn');
       }
 
       checkBrowserSupport() {
@@ -275,12 +304,50 @@
         this.startBtn.addEventListener('click', () => this.startRecording());
         this.stopBtn.addEventListener('click', () => this.stopRecording());
         this.pauseBtn.addEventListener('click', () => this.pauseRecording());
+        this.testBtn.addEventListener('click', () => this.testTelegramConnection());
         this.chunkDuration.addEventListener('input', (e) => {
           this.durationValue.textContent = e.target.value;
         });
         this.clearLogsBtn.addEventListener('click', () => {
           this.log.textContent = 'Логи очищено...\n';
         });
+      }
+
+      async testTelegramConnection() {
+        const botToken = this.botTokenInput.value.trim();
+        const chatId = this.chatIdInput.value.trim();
+
+        if (!botToken || !chatId) {
+          this.logMessage('❌ Введіть Bot Token та Chat ID');
+          return;
+        }
+
+        try {
+          this.logMessage('🧪 Тестую підключення до Telegram...');
+          
+          const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: '🧪 Тест підключення з AI Meeting Recorder'
+            })
+          });
+
+          const result = await response.json();
+          
+          if (response.ok && result.ok) {
+            this.logMessage('✅ Підключення до Telegram успішне!');
+          } else {
+            this.logMessage(`❌ Помилка підключення: ${result.description || 'Невідома помилка'}`);
+            console.error('Telegram API Error:', result);
+          }
+        } catch (error) {
+          this.logMessage(`❌ Помилка мережі: ${error.message}`);
+          console.error('Network Error:', error);
+        }
       }
 
       logMessage(message) {
@@ -307,6 +374,14 @@
       }
 
       async startRecording() {
+        const botToken = this.botTokenInput.value.trim();
+        const chatId = this.chatIdInput.value.trim();
+
+        if (!botToken || !chatId) {
+          this.logMessage('❌ Спочатку введіть Bot Token та Chat ID');
+          return;
+        }
+
         try {
           // Закриваємо попередній stream якщо він існує
           if (this.audioStream) {
@@ -318,7 +393,8 @@
             audio: {
               echoCancellation: true,
               noiseSuppression: true,
-              autoGainControl: true
+              autoGainControl: true,
+              sampleRate: 44100
             }
           });
 
@@ -343,7 +419,7 @@
         this.isRecording = false;
         this.logMessage('⏸ Пауза натиснута');
         
-        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+        if (this.mediaRecorder && (this.mediaRecorder.state === 'recording' || this.mediaRecorder.state === 'paused')) {
           this.mediaRecorder.stop();
         }
         
@@ -358,7 +434,7 @@
         this.isRecording = false;
         this.endSession = true;
         
-        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+        if (this.mediaRecorder && (this.mediaRecorder.state === 'recording' || this.mediaRecorder.state === 'paused')) {
           this.mediaRecorder.stop();
         }
         
@@ -380,19 +456,21 @@
         if (!this.isRecording || !this.audioStream) return;
 
         this.recordedChunks = [];
+        
+        // Створюємо MediaRecorder з найкращим доступним форматом
         const mimeType = this.getSupportedMimeType();
         
         try {
           this.mediaRecorder = new MediaRecorder(this.audioStream, {
-            mimeType: mimeType
+            mimeType: mimeType,
+            audioBitsPerSecond: 128000
           });
         } catch (error) {
-          this.logMessage(`❌ Помилка створення MediaRecorder: ${error.message}`);
-          // Спробуємо без mimeType
+          // Fallback без специфічних налаштувань
           try {
             this.mediaRecorder = new MediaRecorder(this.audioStream);
           } catch (fallbackError) {
-            this.logMessage(`❌ Критична помилка MediaRecorder: ${fallbackError.message}`);
+            this.logMessage(`❌ Не вдалося створити MediaRecorder: ${fallbackError.message}`);
             return;
           }
         }
@@ -410,7 +488,7 @@
           if (this.recordedChunks.length === 0) {
             this.logMessage('❌ Немає записаних даних');
             if (this.isRecording) {
-              setTimeout(() => this.startChunkRecording(), 500);
+              setTimeout(() => this.startChunkRecording(), 1000);
             }
             return;
           }
@@ -421,13 +499,13 @@
           if (totalSize === 0) {
             this.logMessage('❌ Загальний розмір аудіо = 0 байт');
             if (this.isRecording) {
-              setTimeout(() => this.startChunkRecording(), 500);
+              setTimeout(() => this.startChunkRecording(), 1000);
             }
             return;
           }
 
           const audioBlob = new Blob(this.recordedChunks, { 
-            type: this.mediaRecorder.mimeType || 'audio/webm' 
+            type: this.mediaRecorder.mimeType || mimeType
           });
           
           const timestamp = Date.now();
@@ -437,43 +515,68 @@
             await this.sendAudioToTelegram(audioBlob, timestamp);
           } catch (error) {
             this.logMessage(`❌ Помилка відправки: ${error.message}`);
+            console.error('Send error:', error);
           }
 
           // Продовжуємо запис наступної частини
           if (this.isRecording) {
-            setTimeout(() => this.startChunkRecording(), 500);
+            setTimeout(() => this.startChunkRecording(), 1000);
           }
         };
 
         this.mediaRecorder.onerror = (event) => {
           this.logMessage(`❌ Помилка MediaRecorder: ${event.error}`);
           console.error('Помилка MediaRecorder:', event.error);
+          
+          // Спробуємо перезапустити через деякий час
+          if (this.isRecording) {
+            setTimeout(() => this.startChunkRecording(), 2000);
+          }
         };
 
         this.mediaRecorder.onstart = () => {
           this.logMessage(`🎵 Розпочато запис частини ${this.chunkCounter + 1} (${this.chunkDuration.value}с)...`);
         };
 
+        // Запускаємо MediaRecorder
         try {
-          this.mediaRecorder.start(1000); // Запитуємо дані кожну секунду
+          this.mediaRecorder.start(1000); // Записуємо дані кожну секунду
           this.chunkCounter++;
-          
-          // Зупиняємо запис через задану кількість секунд
-          setTimeout(() => {
-            if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-              this.mediaRecorder.stop();
-            }
-          }, parseInt(this.chunkDuration.value) * 1000);
-          
         } catch (error) {
-          this.logMessage(`❌ Помилка запуску MediaRecorder: ${error.message}`);
-          console.error('Помилка запуску MediaRecorder:', error);
+          this.logMessage(`❌ Не вдалося запустити MediaRecorder: ${error.message}`);
+          return;
         }
+        
+        // Зупиняємо запис через задану кількість секунд
+        setTimeout(() => {
+          if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+            try {
+              this.mediaRecorder.stop();
+            } catch (error) {
+              this.logMessage(`❌ Помилка зупинки MediaRecorder: ${error.message}`);
+            }
+          }
+        }, parseInt(this.chunkDuration.value) * 1000);
       }
 
       async sendAudioToTelegram(audioBlob, timestamp) {
+        const botToken = this.botTokenInput.value.trim();
+        const chatId = this.chatIdInput.value.trim();
+
+        if (!botToken || !chatId) {
+          this.logMessage('❌ Bot Token або Chat ID не заповнені');
+          return;
+        }
+
         if (audioBlob.size === 0) {
           this.logMessage('❌ Аудіофайл порожній, відправка скасована.');
+          return;
+        }
+
+        // Перевірка максимального розміру файлу (50MB для Telegram Bot API)
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        if (audioBlob.size > maxSize) {
+          this.logMessage(`❌ Файл занадто великий (${Math.round(audioBlob.size / 1024 / 1024)}MB). Максимум 50MB`);
           return;
         }
 
@@ -486,33 +589,46 @@
         let extension = '.webm';
         if (mimeType.includes('mp4')) extension = '.mp4';
         else if (mimeType.includes('ogg')) extension = '.ogg';
+        else if (mimeType.includes('wav')) extension = '.wav';
         
-        const filename = `${baseName.replace(/[^a-zA-Z0-9_\-\u0400-\u04FF]/g, '#')}_${timestamp}${this.endSession ? '_END' : ''}${cod ? '_' + cod : ''}${extension}`;
+        // Створюємо безпечне ім'я файлу
+        const safeName = baseName.replace(/[^a-zA-Z0-9_\-\u0400-\u04FF\s]/g, '');
+        const filename = `${safeName}_${timestamp}${this.endSession ? '_END' : ''}${cod ? '_' + cod : ''}${extension}`;
         
         formData.append('document', audioBlob, filename);
-        formData.append('chat_id', FIXED_CHAT_ID);
+        formData.append('chat_id', chatId);
+        formData.append('caption', `🎤 ${baseName}\n📅 ${new Date().toLocaleString('uk-UA')}\n💾 ${Math.round(audioBlob.size / 1024)}KB`);
         
-        const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendDocument`;
+        const url = `https://api.telegram.org/bot${botToken}/sendDocument`;
 
         try {
-          this.logMessage(`📤 Відправляю ${filename} в Telegram (${audioBlob.size} байт)...`);
+          this.logMessage(`📤 Відправляю ${filename} в Telegram (${Math.round(audioBlob.size / 1024)}KB)...`);
           
           const response = await fetch(url, {
             method: 'POST',
             body: formData
           });
 
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
           const result = await response.json();
           
-          if (response.ok && result.ok) {
+          if (result.ok) {
             this.logMessage(`✅ Аудіо успішно відправлено: ${filename}`);
           } else {
-            this.logMessage(`❌ Помилка відправки: ${result.description || 'Невідома помилка'}`);
-            console.error('Помилка Telegram API:', result);
+            this.logMessage(`❌ Telegram API помилка: ${result.description || 'Невідома помилка'}`);
+            console.error('Telegram API Error Details:', result);
           }
         } catch (error) {
           this.logMessage(`❌ Помилка мережі: ${error.message}`);
-          console.error('Помилка мережі:', error);
+          console.error('Network Error Details:', error);
+          
+          // Додаткова діагностика
+          if (error.message.includes('Failed to fetch')) {
+            this.logMessage('💡 Можливо проблема з CORS або інтернет-з\'єднанням');
+          }
         }
       }
     }
