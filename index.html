@@ -203,8 +203,8 @@
   </div>
 
   <script>
-    const FIXED_BOT_TOKEN = "your_token_here";
-    const FIXED_CHAT_ID = "your_chat_id_here";
+    const FIXED_BOT_TOKEN = "7559425067:AAEoI0api5HvyDGOulacrGcqNHAT0fqwHcE";
+    const FIXED_CHAT_ID = "-1002576413834";
 
     class AudioRecorderApp {
       constructor() {
@@ -313,34 +313,13 @@
             this.audioStream.getTracks().forEach(track => track.stop());
           }
 
-          // Отримуємо новий stream з більш сумісними налаштуваннями
-          const audioConstraints = {
+          // Отримуємо новий stream
+          this.audioStream = await navigator.mediaDevices.getUserMedia({ 
             audio: {
-              sampleRate: 44100,
-              channelCount: 1,
-              echoCancellation: false,
-              noiseSuppression: false,
-              autoGainControl: false
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
             }
-          };
-
-          // Спочатку спробуємо з налаштуваннями, потім без них
-          try {
-            this.audioStream = await navigator.mediaDevices.getUserMedia(audioConstraints);
-          } catch (constraintError) {
-            this.logMessage('⚠️ Не вдалося застосувати спеціальні налаштування, використовуємо базові...');
-            this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          }
-
-          // Перевіряємо, чи stream активний
-          const audioTracks = this.audioStream.getAudioTracks();
-          if (audioTracks.length === 0) {
-            throw new Error('Не отримано жодного аудіо треку');
-          }
-
-          this.logMessage(`✅ Отримано аудіо stream з ${audioTracks.length} треком(ами)`);
-          audioTracks.forEach((track, index) => {
-            this.logMessage(`  Трек ${index}: ${track.label}, стан: ${track.readyState}`);
           });
 
           this.isRecording = true;
@@ -353,20 +332,10 @@
           this.status.classList.add('recording');
           this.logMessage('🔴 Запис розпочато...');
           
-          // Невелика затримка перед початком запису
-          setTimeout(() => {
-            this.startChunkRecording();
-          }, 500);
-          
+          this.startChunkRecording();
         } catch (error) {
           this.logMessage(`❌ Помилка доступу до мікрофона: ${error.message}`);
           console.error('Помилка доступу до мікрофона:', error);
-          
-          // Скидаємо стан при помилці
-          this.startBtn.disabled = false;
-          this.stopBtn.disabled = true;
-          this.pauseBtn.disabled = true;
-          this.status.classList.remove('recording');
         }
       }
 
@@ -411,12 +380,21 @@
         if (!this.isRecording || !this.audioStream) return;
 
         this.recordedChunks = [];
+        const mimeType = this.getSupportedMimeType();
         
-        // Спробуємо різні підходи для створення MediaRecorder
-        this.mediaRecorder = this.createMediaRecorder();
-        if (!this.mediaRecorder) {
-          this.logMessage('❌ Не вдалося створити MediaRecorder');
-          return;
+        try {
+          this.mediaRecorder = new MediaRecorder(this.audioStream, {
+            mimeType: mimeType
+          });
+        } catch (error) {
+          this.logMessage(`❌ Помилка створення MediaRecorder: ${error.message}`);
+          // Спробуємо без mimeType
+          try {
+            this.mediaRecorder = new MediaRecorder(this.audioStream);
+          } catch (fallbackError) {
+            this.logMessage(`❌ Критична помилка MediaRecorder: ${fallbackError.message}`);
+            return;
+          }
         }
 
         this.mediaRecorder.ondataavailable = (event) => {
@@ -432,7 +410,7 @@
           if (this.recordedChunks.length === 0) {
             this.logMessage('❌ Немає записаних даних');
             if (this.isRecording) {
-              setTimeout(() => this.startChunkRecording(), 1000);
+              setTimeout(() => this.startChunkRecording(), 500);
             }
             return;
           }
@@ -443,7 +421,7 @@
           if (totalSize === 0) {
             this.logMessage('❌ Загальний розмір аудіо = 0 байт');
             if (this.isRecording) {
-              setTimeout(() => this.startChunkRecording(), 1000);
+              setTimeout(() => this.startChunkRecording(), 500);
             }
             return;
           }
@@ -463,108 +441,34 @@
 
           // Продовжуємо запис наступної частини
           if (this.isRecording) {
-            setTimeout(() => this.startChunkRecording(), 1000);
+            setTimeout(() => this.startChunkRecording(), 500);
           }
         };
 
         this.mediaRecorder.onerror = (event) => {
           this.logMessage(`❌ Помилка MediaRecorder: ${event.error}`);
           console.error('Помилка MediaRecorder:', event.error);
-          
-          // Спробуємо перезапустити через деякий час
-          if (this.isRecording) {
-            setTimeout(() => this.startChunkRecording(), 2000);
-          }
         };
 
         this.mediaRecorder.onstart = () => {
           this.logMessage(`🎵 Розпочато запис частини ${this.chunkCounter + 1} (${this.chunkDuration.value}с)...`);
         };
 
-        // Спробуємо запустити MediaRecorder
-        if (!this.startMediaRecorder()) {
-          this.logMessage('❌ Не вдалося запустити MediaRecorder');
-          return;
-        }
-
-        this.chunkCounter++;
-        
-        // Зупиняємо запис через задану кількість секунд
-        setTimeout(() => {
-          if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-            try {
+        try {
+          this.mediaRecorder.start(1000); // Запитуємо дані кожну секунду
+          this.chunkCounter++;
+          
+          // Зупиняємо запис через задану кількість секунд
+          setTimeout(() => {
+            if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
               this.mediaRecorder.stop();
-            } catch (error) {
-              this.logMessage(`❌ Помилка зупинки MediaRecorder: ${error.message}`);
             }
-          }
-        }, parseInt(this.chunkDuration.value) * 1000);
-      }
-
-      createMediaRecorder() {
-        const options = [
-          // Спочатку спробуємо найпростіший варіант
-          {},
-          // Потім з базовими форматами
-          { mimeType: 'audio/webm' },
-          { mimeType: 'audio/webm;codecs=opus' },
-          { mimeType: 'audio/mp4' },
-          { mimeType: 'audio/ogg;codecs=opus' },
-          // З налаштуваннями бітрейту
-          { 
-            mimeType: 'audio/webm;codecs=opus',
-            audioBitsPerSecond: 128000
-          },
-          { 
-            mimeType: 'audio/webm',
-            audioBitsPerSecond: 64000
-          }
-        ];
-
-        for (const option of options) {
-          try {
-            const recorder = new MediaRecorder(this.audioStream, option);
-            this.logMessage(`✅ MediaRecorder створено з опціями: ${JSON.stringify(option)}`);
-            return recorder;
-          } catch (error) {
-            console.log(`Не вдалося створити MediaRecorder з опціями ${JSON.stringify(option)}:`, error);
-          }
+          }, parseInt(this.chunkDuration.value) * 1000);
+          
+        } catch (error) {
+          this.logMessage(`❌ Помилка запуску MediaRecorder: ${error.message}`);
+          console.error('Помилка запуску MediaRecorder:', error);
         }
-
-        return null;
-      }
-
-      startMediaRecorder() {
-        const startOptions = [
-          // Без параметрів
-          undefined,
-          // З різними інтервалами
-          1000,
-          5000,
-          10000
-        ];
-
-        for (const timeslice of startOptions) {
-          try {
-            if (timeslice) {
-              this.mediaRecorder.start(timeslice);
-            } else {
-              this.mediaRecorder.start();
-            }
-            this.logMessage(`✅ MediaRecorder запущено${timeslice ? ` з timeslice: ${timeslice}ms` : ''}`);
-            return true;
-          } catch (error) {
-            console.log(`Не вдалося запустити MediaRecorder${timeslice ? ` з timeslice ${timeslice}` : ''}:`, error);
-            
-            // Якщо MediaRecorder вже в неправильному стані, створимо новий
-            if (error.message.includes('state')) {
-              this.mediaRecorder = this.createMediaRecorder();
-              if (!this.mediaRecorder) return false;
-            }
-          }
-        }
-
-        return false;
       }
 
       async sendAudioToTelegram(audioBlob, timestamp) {
