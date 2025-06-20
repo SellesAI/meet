@@ -1,348 +1,621 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 AI Meeting Recorder</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            box-sizing: border-box;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            box-sizing: border-box;
-        }
-        .chunk-duration, .controls, .log-section {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .log {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            height: 200px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .status {
-            text-align: center;
-            font-size: 18px;
-            margin: 20px 0;
-            font-weight: bold;
-        }
-        .recording {
-            color: #ff6b6b;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        button {
-            font-size: 18px;
-            padding: 15px 30px;
-            margin: 10px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        .start-btn {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-        }
-        .stop-btn {
-            background: linear-gradient(45deg, #dc3545, #e74c3c);
-            color: white;
-	.pause-btn {
-            background: linear-gradient(45deg, #FFEB3B, #FFC107);
-            color: white;
-        }
-        .clear-btn {
-            background: linear-gradient(45deg, #6c757d, #495057);
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚀 AI Meeting Recorder</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 2.2em;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .chunk-duration {
+      margin-bottom: 25px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-top: 10px;
+    }
+    .status {
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: 600;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 10px;
+      background: #e8f5e8;
+      color: #2d5016;
+      transition: all 0.3s;
+    }
+    .status.recording {
+      background: #ffe8e8;
+      color: #d63384;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+    button {
+      flex: 1;
+      min-width: 120px;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .start-btn {
+      background: #28a745;
+      color: white;
+    }
+    .start-btn:hover:not(:disabled) {
+      background: #218838;
+      transform: translateY(-2px);
+    }
+    .pause-btn {
+      background: #ffc107;
+      color: #212529;
+    }
+    .pause-btn:hover:not(:disabled) {
+      background: #e0a800;
+      transform: translateY(-2px);
+    }
+    .stop-btn {
+      background: #dc3545;
+      color: white;
+    }
+    .stop-btn:hover:not(:disabled) {
+      background: #c82333;
+      transform: translateY(-2px);
+    }
+    .clear-btn {
+      background: #6c757d;
+      color: white;
+    }
+    .clear-btn:hover:not(:disabled) {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .log-section {
+      margin-top: 30px;
+    }
+    .section-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+    }
+    .log {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      padding: 20px;
+      height: 200px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .debug-info {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 AI Meeting Recorder</h1>
+  <div class="container">
+    <h1>🚀 AI Meeting Recorder</h1>
 
-        <div class="input-group">
-            <label for="meetingName">Назва зустрічі:</label>
-            <input type="text" id="meetingName" placeholder="Введіть назву зустрічі">
-        </div>
-
-        <div class="chunk-duration">
-            <label>Тривалість частини: <span id="durationValue">240</span> секунд</label><br>
-            <input type="range" id="chunkDuration" min="10" max="300" value="240" step="5">
-        </div>
-
-        <div class="status" id="status">▶️ Готовий до запису</div>
-
-        <div class="controls">
-            <button class="start-btn" id="startBtn">🎤 Старт</button>
-            <button class="pause-btn" id="pauseBtn">⏸ Пауза</button>
-            <button class="stop-btn" id="stopBtn" disabled>🚩 Стоп</button>
-            <button class="clear-btn" id="clearLogsBtn">🗑️ Очистити логи</button>
-        </div>
-
-        <div class="log-section">
-            <div class="section-title">📝 Журнал подій</div>
-            <div class="log" id="log">Готовий до роботи...</div>
-        </div>
+    <div class="input-group">
+      <label for="meetingName">Назва зустрічі:</label>
+      <input type="text" id="meetingName" placeholder="Введіть назву зустрічі">
     </div>
 
-    <script>
-        const FIXED_BOT_TOKEN = "7559425067:AAEoI0api5HvyDGOulacrGcqNHAT0fqwHcE";
-        const FIXED_CHAT_ID = "-1002576413834";
+    <div class="input-group">
+      <label for="cod">Код (для назви файлу):</label>
+      <input type="number" id="cod" placeholder="Введіть код, наприклад 123">
+    </div>
 
-        class AudioRecorderApp {
-            constructor() {
-                this.isRecording = false;
-                this.mediaRecorder = null;
-                this.chunkCounter = 0;
-                this.endSession = false;
-                this.initializeElements();
-                this.setupEventListeners();
-            }
-            initializeElements() {
-                this.startBtn = document.getElementById('startBtn');
-                this.stopBtn = document.getElementById('stopBtn');
-                this.pauseBtn = document.getElementById('pauseBtn');
-                this.status = document.getElementById('status');
-                this.log = document.getElementById('log');
-                this.chunkDuration = document.getElementById('chunkDuration');
-                this.durationValue = document.getElementById('durationValue');
-                this.clearLogsBtn = document.getElementById('clearLogsBtn');
-                this.meetingNameInput = document.getElementById('meetingName');
-            }
-            setupEventListeners() {
-                this.startBtn.addEventListener('click', () => this.startRecording());
-                this.stopBtn.addEventListener('click', () => this.stopRecording());
-                this.pauseBtn.addEventListener('click', () => this.pauseRecording());
-                this.chunkDuration.addEventListener('input', (e) => {
-                    this.durationValue.textContent = e.target.value;
-                });
-                this.clearLogsBtn.addEventListener('click', () => {
-                    this.log.textContent = 'Логи очищено...\n';
-                });
-            }
-            logMessage(message) {
-                const timestamp = new Date().toLocaleTimeString('uk-UA');
-                this.log.textContent += `\n[${timestamp}] ${message}`;
-                this.log.scrollTop = this.log.scrollHeight;
-            }
-            async startRecording() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        audio: {
-                            sampleRate: 16000,
-                            channelCount: 1,
-                            echoCancellation: true,
-                            noiseSuppression: true
-                        }
-                    });
-                    this.isRecording = true;
-                    this.endSession = false;
-                    this.chunkCounter = 0;
-                    this.startBtn.disabled = true;
-                    this.stopBtn.disabled = false;
-                    this.status.textContent = '🔴 Запис активний...';
-                    this.status.classList.add('recording');
-                    this.logMessage('🔴 Запис розпочато...');
-                    this.startChunkRecording(stream);
-                } catch (error) {
-                    this.logMessage(`❌ Помилка доступу до мікрофона: ${error.message}`);
-                }
-            }
-            pauseRecording() {
-                this.isRecording = false;
-                this.logMessage('⏸ Пауза натиснута');
-                if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-                    this.mediaRecorder.stop();
-                }
-                this.startBtn.disabled = false;
-                this.stopBtn.disabled = false;
-                this.status.textContent = '⏸ Запис призупинено';
-                this.status.classList.remove('recording');
-            }
-            stopRecording() {
-                this.isRecording = false;
-                this.endSession = true;
-                if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-                    this.mediaRecorder.stop();
-                }
-                this.startBtn.disabled = false;
-                this.stopBtn.disabled = true;
-                this.pauseBtn.disabled = true;
-                this.status.textContent = '⏹️ Запис зупинено';
-                this.status.classList.remove('recording');
-                this.logMessage('⏹️ Запис зупинено з позначкою END');
-            }
-            startChunkRecording(stream) {
-                if (!this.isRecording) return;
-                const chunks = [];
-                this.mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'audio/webm;codecs=opus'
-                });
-                this.mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        chunks.push(event.data);
-                    }
-                };
-                this.mediaRecorder.onstop = async () => {
-                    const webmAudioBlob = new Blob(chunks, { type: 'audio/webm' });
-                    const timestamp = Date.now();
-                    this.logMessage(`⏳ Конвертую WebM в WAV для відправки...`);
-                    try {
-                        const wavAudioBlob = await this.convertWebmToWav(webmAudioBlob);
-                        await this.sendAudioToTelegram(wavAudioBlob, timestamp);
-                    } catch (conversionError) {
-                        this.logMessage(`❌ Помилка конвертації: ${conversionError.message}`);
-                    }
-                    if (this.isRecording) {
-                        setTimeout(() => this.startChunkRecording(stream), 500);
-                    }
-                };
-                this.mediaRecorder.start();
-                this.chunkCounter++;
-                this.logMessage(`🎵 Запис частини ${this.chunkCounter} (${this.chunkDuration.value}с)...`);
-                setTimeout(() => {
-                    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-                        this.mediaRecorder.stop();
-                    }
-                }, parseInt(this.chunkDuration.value) * 1000);
-            }
-            async sendAudioToTelegram(audioBlob, timestamp) {
-                const formData = new FormData();
-                const baseName = this.meetingNameInput.value.trim() || 'audio';
-                const filename = `${baseName.replace(/[^a-zA-Z0-9_\-\u0400-\u04FF]/g, '#')}_${timestamp}${this.endSession ? '_END' : ''}.wav`;
-                formData.append('audio', audioBlob, filename);
-                formData.append('chat_id', FIXED_CHAT_ID);
-                const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendAudio`;
-                try {
-                    this.logMessage(`📤 Відправляю ${filename} в Telegram...`);
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const result = await response.json();
-                    if (response.ok && result.ok) {
-                        this.logMessage(`✅ Аудіо успішно відправлено: ${filename}`);
-                    } else {
-                        this.logMessage(`❌ Помилка відправки: ${result.description || 'Невідома'}`);
-                    }
-                } catch (error) {
-                    this.logMessage(`❌ Помилка мережі: ${error.message}`);
-                }
-            }
-            async convertWebmToWav(webmBlob) {
-                return new Promise((resolve, reject) => {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const fileReader = new FileReader();
-                    fileReader.onload = async () => {
-                        try {
-                            const audioBuffer = await audioContext.decodeAudioData(fileReader.result);
-                            const offlineAudioContext = new OfflineAudioContext(
-                                audioBuffer.numberOfChannels,
-                                audioBuffer.length,
-                                audioBuffer.sampleRate
-                            );
-                            const source = offlineAudioContext.createBufferSource();
-                            source.buffer = audioBuffer;
-                            source.connect(offlineAudioContext.destination);
-                            source.start(0);
-                            const renderedBuffer = await offlineAudioContext.startRendering();
-                            const wavData = this.encodeWAV(renderedBuffer, audioBuffer.sampleRate, audioBuffer.numberOfChannels);
-                            const wavBlob = new Blob([wavData], { type: 'audio/wav' });
-                            resolve(wavBlob);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    };
-                    fileReader.onerror = (e) => reject(e);
-                    fileReader.readAsArrayBuffer(webmBlob);
-                });
-            }
-            encodeWAV(audioBuffer, sampleRate, numChannels) {
-                const dataLength = audioBuffer.length * numChannels * 2;
-                const buffer = new ArrayBuffer(44 + dataLength);
-                const view = new DataView(buffer);
-                let offset = 0;
-                this.writeString(view, offset, 'RIFF'); offset += 4;
-                view.setUint32(offset, 36 + dataLength, true); offset += 4;
-                this.writeString(view, offset, 'WAVE'); offset += 4;
-                this.writeString(view, offset, 'fmt '); offset += 4;
-                view.setUint32(offset, 16, true); offset += 4;
-                view.setUint16(offset, 1, true); offset += 2;
-                view.setUint16(offset, numChannels, true); offset += 2;
-                view.setUint32(offset, sampleRate, true); offset += 4;
-                view.setUint32(offset, sampleRate * numChannels * 2, true); offset += 4;
-                view.setUint16(offset, numChannels * 2, true); offset += 2;
-                view.setUint16(offset, 16, true); offset += 2;
-                this.writeString(view, offset, 'data'); offset += 4;
-                view.setUint32(offset, dataLength, true); offset += 4;
-                for (let i = 0; i < audioBuffer.length; i++) {
-                    for (let channel = 0; channel < numChannels; channel++) {
-                        let sample = audioBuffer.getChannelData(channel)[i];
-                        const s = Math.max(-1, Math.min(1, sample));
-                        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-                        offset += 2;
-                    }
-                }
-                return buffer;
-            }
-            writeString(view, offset, string) {
-                for (let i = 0; i < string.length; i++) {
-                    view.setUint8(offset + i, string.charCodeAt(i));
-                }
-            }
+    <div class="chunk-duration">
+      <label>Тривалість частини: <span id="durationValue">240</span> секунд</label><br>
+      <input type="range" id="chunkDuration" min="10" max="300" value="240" step="5">
+    </div>
+
+    <div class="debug-info" id="debugInfo">
+      <strong>Інформація про підтримку:</strong><br>
+      <span id="supportInfo">Перевіряю підтримку браузера...</span>
+    </div>
+
+    <div class="status" id="status">▶️ Готовий до запису</div>
+
+    <div class="controls">
+      <button class="start-btn" id="startBtn">🎤 Старт</button>
+      <button class="pause-btn" id="pauseBtn">⏸ Пауза</button>
+      <button class="stop-btn" id="stopBtn" disabled>🚩 Стоп</button>
+      <button class="clear-btn" id="clearLogsBtn">🗑️ Очистити логи</button>
+    </div>
+
+    <div class="log-section">
+      <div class="section-title">📜 Журнал подій</div>
+      <div class="log" id="log">Готовий до роботи...</div>
+    </div>
+  </div>
+
+  <script>
+    const FIXED_BOT_TOKEN = "your_token_here";
+    const FIXED_CHAT_ID = "your_chat_id_here";
+
+    class AudioRecorderApp {
+      constructor() {
+        this.isRecording = false;
+        this.mediaRecorder = null;
+        this.chunkCounter = 0;
+        this.endSession = false;
+        this.audioStream = null;
+        this.recordedChunks = [];
+        this.initializeElements();
+        this.checkBrowserSupport();
+        this.setupEventListeners();
+      }
+
+      initializeElements() {
+        this.startBtn = document.getElementById('startBtn');
+        this.stopBtn = document.getElementById('stopBtn');
+        this.pauseBtn = document.getElementById('pauseBtn');
+        this.status = document.getElementById('status');
+        this.log = document.getElementById('log');
+        this.chunkDuration = document.getElementById('chunkDuration');
+        this.durationValue = document.getElementById('durationValue');
+        this.clearLogsBtn = document.getElementById('clearLogsBtn');
+        this.meetingNameInput = document.getElementById('meetingName');
+        this.codInput = document.getElementById('cod');
+        this.supportInfo = document.getElementById('supportInfo');
+      }
+
+      checkBrowserSupport() {
+        let supportText = '';
+        
+        // Перевірка підтримки MediaRecorder
+        if (!window.MediaRecorder) {
+          supportText += '❌ MediaRecorder не підтримується\n';
+        } else {
+          supportText += '✅ MediaRecorder підтримується\n';
         }
-        document.addEventListener('DOMContentLoaded', () => {
-            new AudioRecorderApp();
+
+        // Перевірка підтримки getUserMedia
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          supportText += '❌ getUserMedia не підтримується\n';
+        } else {
+          supportText += '✅ getUserMedia підтримується\n';
+        }
+
+        // Перевірка підтримки форматів
+        const mimeTypes = [
+          'audio/webm',
+          'audio/webm;codecs=opus',
+          'audio/webm;codecs=vorbis',
+          'audio/mp4',
+          'audio/ogg;codecs=opus'
+        ];
+
+        supportText += '\nПідтримувані формати:\n';
+        mimeTypes.forEach(type => {
+          if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type)) {
+            supportText += `✅ ${type}\n`;
+          } else {
+            supportText += `❌ ${type}\n`;
+          }
         });
-    </script>
+
+        this.supportInfo.textContent = supportText;
+      }
+
+      setupEventListeners() {
+        this.startBtn.addEventListener('click', () => this.startRecording());
+        this.stopBtn.addEventListener('click', () => this.stopRecording());
+        this.pauseBtn.addEventListener('click', () => this.pauseRecording());
+        this.chunkDuration.addEventListener('input', (e) => {
+          this.durationValue.textContent = e.target.value;
+        });
+        this.clearLogsBtn.addEventListener('click', () => {
+          this.log.textContent = 'Логи очищено...\n';
+        });
+      }
+
+      logMessage(message) {
+        const timestamp = new Date().toLocaleTimeString('uk-UA');
+        this.log.textContent += `\n[${timestamp}] ${message}`;
+        this.log.scrollTop = this.log.scrollHeight;
+        console.log(`[${timestamp}] ${message}`);
+      }
+
+      getSupportedMimeType() {
+        const mimeTypes = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/mp4',
+          'audio/ogg;codecs=opus'
+        ];
+
+        for (const type of mimeTypes) {
+          if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type)) {
+            return type;
+          }
+        }
+        return 'audio/webm'; // fallback
+      }
+
+      async startRecording() {
+        try {
+          // Закриваємо попередній stream якщо він існує
+          if (this.audioStream) {
+            this.audioStream.getTracks().forEach(track => track.stop());
+          }
+
+          // Отримуємо новий stream з більш сумісними налаштуваннями
+          const audioConstraints = {
+            audio: {
+              sampleRate: 44100,
+              channelCount: 1,
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false
+            }
+          };
+
+          // Спочатку спробуємо з налаштуваннями, потім без них
+          try {
+            this.audioStream = await navigator.mediaDevices.getUserMedia(audioConstraints);
+          } catch (constraintError) {
+            this.logMessage('⚠️ Не вдалося застосувати спеціальні налаштування, використовуємо базові...');
+            this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          }
+
+          // Перевіряємо, чи stream активний
+          const audioTracks = this.audioStream.getAudioTracks();
+          if (audioTracks.length === 0) {
+            throw new Error('Не отримано жодного аудіо треку');
+          }
+
+          this.logMessage(`✅ Отримано аудіо stream з ${audioTracks.length} треком(ами)`);
+          audioTracks.forEach((track, index) => {
+            this.logMessage(`  Трек ${index}: ${track.label}, стан: ${track.readyState}`);
+          });
+
+          this.isRecording = true;
+          this.endSession = false;
+          this.chunkCounter = 0;
+          this.startBtn.disabled = true;
+          this.stopBtn.disabled = false;
+          this.pauseBtn.disabled = false;
+          this.status.textContent = '🔴 Запис активний...';
+          this.status.classList.add('recording');
+          this.logMessage('🔴 Запис розпочато...');
+          
+          // Невелика затримка перед початком запису
+          setTimeout(() => {
+            this.startChunkRecording();
+          }, 500);
+          
+        } catch (error) {
+          this.logMessage(`❌ Помилка доступу до мікрофона: ${error.message}`);
+          console.error('Помилка доступу до мікрофона:', error);
+          
+          // Скидаємо стан при помилці
+          this.startBtn.disabled = false;
+          this.stopBtn.disabled = true;
+          this.pauseBtn.disabled = true;
+          this.status.classList.remove('recording');
+        }
+      }
+
+      pauseRecording() {
+        this.isRecording = false;
+        this.logMessage('⏸ Пауза натиснута');
+        
+        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+          this.mediaRecorder.stop();
+        }
+        
+        this.startBtn.disabled = false;
+        this.stopBtn.disabled = false;
+        this.pauseBtn.disabled = false;
+        this.status.textContent = '⏸ Запис призупинено';
+        this.status.classList.remove('recording');
+      }
+
+      stopRecording() {
+        this.isRecording = false;
+        this.endSession = true;
+        
+        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+          this.mediaRecorder.stop();
+        }
+        
+        // Зупиняємо всі аудіо треки
+        if (this.audioStream) {
+          this.audioStream.getTracks().forEach(track => track.stop());
+          this.audioStream = null;
+        }
+        
+        this.startBtn.disabled = false;
+        this.stopBtn.disabled = true;
+        this.pauseBtn.disabled = true;
+        this.status.textContent = '⏹️ Запис зупинено';
+        this.status.classList.remove('recording');
+        this.logMessage('⏹️ Запис зупинено з позначкою END');
+      }
+
+      startChunkRecording() {
+        if (!this.isRecording || !this.audioStream) return;
+
+        this.recordedChunks = [];
+        
+        // Спробуємо різні підходи для створення MediaRecorder
+        this.mediaRecorder = this.createMediaRecorder();
+        if (!this.mediaRecorder) {
+          this.logMessage('❌ Не вдалося створити MediaRecorder');
+          return;
+        }
+
+        this.mediaRecorder.ondataavailable = (event) => {
+          console.log('Отримано дані:', event.data.size, 'байт');
+          if (event.data && event.data.size > 0) {
+            this.recordedChunks.push(event.data);
+          }
+        };
+
+        this.mediaRecorder.onstop = async () => {
+          console.log('MediaRecorder зупинено. Кількість частин:', this.recordedChunks.length);
+          
+          if (this.recordedChunks.length === 0) {
+            this.logMessage('❌ Немає записаних даних');
+            if (this.isRecording) {
+              setTimeout(() => this.startChunkRecording(), 1000);
+            }
+            return;
+          }
+
+          const totalSize = this.recordedChunks.reduce((sum, chunk) => sum + chunk.size, 0);
+          console.log('Загальний розмір:', totalSize, 'байт');
+          
+          if (totalSize === 0) {
+            this.logMessage('❌ Загальний розмір аудіо = 0 байт');
+            if (this.isRecording) {
+              setTimeout(() => this.startChunkRecording(), 1000);
+            }
+            return;
+          }
+
+          const audioBlob = new Blob(this.recordedChunks, { 
+            type: this.mediaRecorder.mimeType || 'audio/webm' 
+          });
+          
+          const timestamp = Date.now();
+          this.logMessage(`⏳ Готую аудіо для відправки (${audioBlob.size} байт)...`);
+          
+          try {
+            await this.sendAudioToTelegram(audioBlob, timestamp);
+          } catch (error) {
+            this.logMessage(`❌ Помилка відправки: ${error.message}`);
+          }
+
+          // Продовжуємо запис наступної частини
+          if (this.isRecording) {
+            setTimeout(() => this.startChunkRecording(), 1000);
+          }
+        };
+
+        this.mediaRecorder.onerror = (event) => {
+          this.logMessage(`❌ Помилка MediaRecorder: ${event.error}`);
+          console.error('Помилка MediaRecorder:', event.error);
+          
+          // Спробуємо перезапустити через деякий час
+          if (this.isRecording) {
+            setTimeout(() => this.startChunkRecording(), 2000);
+          }
+        };
+
+        this.mediaRecorder.onstart = () => {
+          this.logMessage(`🎵 Розпочато запис частини ${this.chunkCounter + 1} (${this.chunkDuration.value}с)...`);
+        };
+
+        // Спробуємо запустити MediaRecorder
+        if (!this.startMediaRecorder()) {
+          this.logMessage('❌ Не вдалося запустити MediaRecorder');
+          return;
+        }
+
+        this.chunkCounter++;
+        
+        // Зупиняємо запис через задану кількість секунд
+        setTimeout(() => {
+          if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+            try {
+              this.mediaRecorder.stop();
+            } catch (error) {
+              this.logMessage(`❌ Помилка зупинки MediaRecorder: ${error.message}`);
+            }
+          }
+        }, parseInt(this.chunkDuration.value) * 1000);
+      }
+
+      createMediaRecorder() {
+        const options = [
+          // Спочатку спробуємо найпростіший варіант
+          {},
+          // Потім з базовими форматами
+          { mimeType: 'audio/webm' },
+          { mimeType: 'audio/webm;codecs=opus' },
+          { mimeType: 'audio/mp4' },
+          { mimeType: 'audio/ogg;codecs=opus' },
+          // З налаштуваннями бітрейту
+          { 
+            mimeType: 'audio/webm;codecs=opus',
+            audioBitsPerSecond: 128000
+          },
+          { 
+            mimeType: 'audio/webm',
+            audioBitsPerSecond: 64000
+          }
+        ];
+
+        for (const option of options) {
+          try {
+            const recorder = new MediaRecorder(this.audioStream, option);
+            this.logMessage(`✅ MediaRecorder створено з опціями: ${JSON.stringify(option)}`);
+            return recorder;
+          } catch (error) {
+            console.log(`Не вдалося створити MediaRecorder з опціями ${JSON.stringify(option)}:`, error);
+          }
+        }
+
+        return null;
+      }
+
+      startMediaRecorder() {
+        const startOptions = [
+          // Без параметрів
+          undefined,
+          // З різними інтервалами
+          1000,
+          5000,
+          10000
+        ];
+
+        for (const timeslice of startOptions) {
+          try {
+            if (timeslice) {
+              this.mediaRecorder.start(timeslice);
+            } else {
+              this.mediaRecorder.start();
+            }
+            this.logMessage(`✅ MediaRecorder запущено${timeslice ? ` з timeslice: ${timeslice}ms` : ''}`);
+            return true;
+          } catch (error) {
+            console.log(`Не вдалося запустити MediaRecorder${timeslice ? ` з timeslice ${timeslice}` : ''}:`, error);
+            
+            // Якщо MediaRecorder вже в неправильному стані, створимо новий
+            if (error.message.includes('state')) {
+              this.mediaRecorder = this.createMediaRecorder();
+              if (!this.mediaRecorder) return false;
+            }
+          }
+        }
+
+        return false;
+      }
+
+      async sendAudioToTelegram(audioBlob, timestamp) {
+        if (audioBlob.size === 0) {
+          this.logMessage('❌ Аудіофайл порожній, відправка скасована.');
+          return;
+        }
+
+        const formData = new FormData();
+        const baseName = this.meetingNameInput.value.trim() || 'audio';
+        const cod = this.codInput.value.trim();
+        
+        // Визначаємо розширення файлу на основі MIME типу
+        const mimeType = audioBlob.type || 'audio/webm';
+        let extension = '.webm';
+        if (mimeType.includes('mp4')) extension = '.mp4';
+        else if (mimeType.includes('ogg')) extension = '.ogg';
+        
+        const filename = `${baseName.replace(/[^a-zA-Z0-9_\-\u0400-\u04FF]/g, '#')}_${timestamp}${this.endSession ? '_END' : ''}${cod ? '_' + cod : ''}${extension}`;
+        
+        formData.append('document', audioBlob, filename);
+        formData.append('chat_id', FIXED_CHAT_ID);
+        
+        const url = `https://api.telegram.org/bot${FIXED_BOT_TOKEN}/sendDocument`;
+
+        try {
+          this.logMessage(`📤 Відправляю ${filename} в Telegram (${audioBlob.size} байт)...`);
+          
+          const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+          });
+
+          const result = await response.json();
+          
+          if (response.ok && result.ok) {
+            this.logMessage(`✅ Аудіо успішно відправлено: ${filename}`);
+          } else {
+            this.logMessage(`❌ Помилка відправки: ${result.description || 'Невідома помилка'}`);
+            console.error('Помилка Telegram API:', result);
+          }
+        } catch (error) {
+          this.logMessage(`❌ Помилка мережі: ${error.message}`);
+          console.error('Помилка мережі:', error);
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new AudioRecorderApp();
+    });
+  </script>
 </body>
 </html>
