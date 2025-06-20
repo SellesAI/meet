@@ -568,7 +568,7 @@
         }
 
         // Перевірка максимального розміру файлу (25MB для Telegram Bot API)
-        const maxSize = 25 * 1024 * 1024; // 25MB
+        const maxSize = 24 * 1024 * 1024; // 25MB
         if (audioBlob.size > maxSize) {
           this.logMessage(`❌ Файл занадто великий (${Math.round(audioBlob.size / 1024 / 1024)}MB). Максимум 25MB`);
           return;
@@ -631,5 +631,23 @@
       new AudioRecorderApp();
     });
   </script>
+  //Чат айді скрипт
+  <script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const tg = window.Telegram.WebApp;
+    const initDataUnsafe = tg.initDataUnsafe;
+
+    if (initDataUnsafe && initDataUnsafe.user && initDataUnsafe.user.id) {
+      const chatId = initDataUnsafe.user.id;
+      const chatIdField = document.getElementById("cod");
+      if (chatIdField) {
+        chatIdField.value = chatId;
+      }
+    } else {
+      console.log("Не вдалося отримати chat_id з Telegram WebApp.");
+    }
+  });
+</script>
+  //Чат айді скрип енд
 </body>
 </html>
